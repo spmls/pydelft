@@ -1,5 +1,6 @@
 import numpy as np
-from pydelft.read_griddep import grd, dep
+from pydelft.grd import grd
+from pydelft.dep import dep
 from PyQt4 import QtGui
 import mpl_toolkits.basemap.pyproj as pyproj
 import mpl_toolkits.basemap as Basemap
@@ -48,7 +49,7 @@ class obs():
         station_proj = pyproj.Proj("+init=EPSG:%i" % station_epsg)
 
         if grid_epsg != station_epsg:
-            pyproj.transform(station_proj, grid_proj, station_x, station_y)
+            station_x, station_y = pyproj.transform(station_proj, grid_proj, station_x, station_y)
 
         obs_idx = [find_nearest(grid,[station_x[i], station_y[i]]) for i in range(0, np.size(station_names)-1)]
 
