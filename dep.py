@@ -21,6 +21,19 @@ class depFileDialog(QtGui.QMainWindow):
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd(), "DEP (*.dep)")
         self.fname = fname
 
+class depwriteFileDialog(QtGui.QMainWindow):
+    def __init__(self):
+        super(depwriteFileDialog, self).__init__()
+        fname = []
+        self.initUI()
+    def initUI(self):
+        self.setGeometry(300,300,350,300)
+        self.setWindowTitle('Save depth file')
+        self.savefileDialog()
+    def savefileDialog(self):
+        fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file', os.getcwd(), "DEP (*.dep)")
+        self.fname = fname
+
 class dep():
     """Bathymetry file.  See A.3.4 in Delft3D-FLOW user manual.
 
@@ -79,6 +92,21 @@ class dep():
 
         fname = None
         f.close()
+
+    def write_dep(self, Z, fname = None):
+        if not fname:
+            app = QtGui.QApplication(sys.argv)
+            filedialog = depwriteFileDialog()
+            fname = filedialog.fname
+            app = []
+        else:
+            fname = fname
+
+        blank_row = np.ones(np.shape.(Z))*-999.
+        Z = np.append(Z, 999.)
+        np.savetxt(fname, [-Z, blank_row], delimiter = '\t', fmt = '%.3f')
+
+        self.read_dep(fname = fname)
 
     def plot_dep(self):
         plt.pcolormesh(self.grid.x, self.grid.y, self.depth,

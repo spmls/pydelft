@@ -4,6 +4,8 @@ from pydelft.dep import dep
 from PyQt4 import QtGui
 import mpl_toolkits.basemap.pyproj as pyproj
 import mpl_toolkits.basemap as Basemap
+import sys
+import os
 
 #------------------------------------------------------------------------------
 # OBS SAVE FILE DIALOG
@@ -21,6 +23,19 @@ class SaveObsFileDialog(QtGui.QMainWindow):
         fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file', os.getcwd(), "OBS (*.obs)")
         self.fname = fname
 
+class OpenObsFileDialog(QtGui.QMainWindow):
+    def __init__(self):
+        super(OpenObsFileDialog, self).__init__()
+        fname = []
+        self.initUI()
+    def initUI(self):
+        self.setGeometry(300,300,350,300)
+        self.setWindowTitle('Open obs file')
+        self.openfileDialog()
+    def openfileDialog(self):
+        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd(), "OBS (*.obs)")
+        self.fname = fname
+
 #------------------------------------------------------------------------------
 # OBSERVATIONS DATA CLASS
 
@@ -34,6 +49,38 @@ class obs():
         self.filename = fname
         if self.filename:
             self.read_obs(self.filename)
+
+    def read_obs(self, fname = None):
+        if not fname:
+            app = QtGui.QApplication(sys.argv)
+            filedialog = OpenObsFileDialog()
+            fname = filedialog.fname
+        else:
+            fname = fname
+
+        self.filename = fname
+
+        fromfile = np.genfromtxt(self.filename, dtype=str)
+        self.names = fromfile[:,0]
+        self.m = fromfile[:,1].astype(np.int)
+        self.n = fromfile[:,2].astype(np.int)
+
+        for i in range(0,np.size(self.names)):
+            if self.names[i] == 'm':
+                print("could not load station named 'm'")
+                continue
+            elif self.names[i] == 'n':
+                print("could not load station named 'n'")
+            elif self.names[i][0].isdigit():
+                name = "_" + self.names[i]
+            else:
+                name = self.names[i]
+
+            d = {'m':int(self.m[i]),'n':int(self.n[i])}
+
+            setattr(self, name, d)
+
+        self.num_obs = np.size(self.names)
 
     def coords2mn(self, grid, station_names, station_x, station_y, grid_epsg = 4326, station_epsg = 4326):
         '''Calculate nearest m, n indices on a grid for an array of type (['name', x, y])

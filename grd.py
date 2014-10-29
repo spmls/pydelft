@@ -110,6 +110,19 @@ class grd():
         fname = None
         f.close()
 
+    def write_grd(self, fname=None, depth = None, coord_system = 'Cartesian', ):
+
+        header = '* \n* Delft3d- orthogonal curvilinear grid file\n* File creation date: %s\n*\n' %
+        str(datetime.datetime.now())
+        record1 = 'Coordinate System = %s\n' % coord_system
+        record2 = '\t%i\t%i\n' % (np.shape(x)[0],np.shape(x)[1])
+        record3 = '0 0 0\n'
+
+        # Values for x
+        etax_1 = 10
+
+
+
     def plot_grd(self):
         plt.pcolormesh(self.x,self.y,np.zeros(np.shape(self.x)),
                        edgecolor = 'k', facecolor = 'none', linewidth = 0.0005)
