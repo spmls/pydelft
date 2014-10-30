@@ -48,9 +48,8 @@ class dep():
         grid = ''
         filename = ''
         delimiter = ''
-        self.read_dep(fname, grid_fname)
 
-    def read_dep(self, fname = None, grid_fname = None):
+    def read_dep(self, fname = None):
         if not fname:
             app = QtGui.QApplication(sys.argv)
             filedialog = depFileDialog()
@@ -58,6 +57,7 @@ class dep():
             app = []
         else:
             fname = fname
+
         # Read lines
         f = open(fname, 'r')
         lines = f.readlines()
@@ -77,23 +77,26 @@ class dep():
             for line in lines:
                 for s in line.split():
                     z.append(float(s))
-
-        # Get the shape from an associated grd file
-        grid = grd(grid_fname)
-        # Reshape depth to match grid
-        z = np.reshape(z, (grid.m+1, grid.n+1))
-        z = z[:-1, :-1] # get rid of -999. Nans
+                    
+        # Reshape depth
+        if delimiter != 'space':
+            z = np.reshape(z, (np.size(lines), 
+                np.size(line.split('%s' % delimiter))))
+        else:
+            z = np.reshape(z, (np.size(lines), np.size(line.split())))
+        
+        z = z[:-1, :-1] # get rid of -999. Nans        
 
         # update the class
         self.depth = z
-        self.grid = grid
         self.filename = fname
         self.delimiter = delimiter
 
         fname = None
+
         f.close()
 
-    def write_dep(self, Z, fname = None):
+    def write_dep(self, Z, fname = None, grid_fname = None):
         if not fname:
             app = QtGui.QApplication(sys.argv)
             filedialog = depwriteFileDialog()
@@ -101,12 +104,25 @@ class dep():
             app = []
         else:
             fname = fname
+        
+        if not grid_fname:
+            m = np.shape(Z)[0]
+            n = np.shape(Z)[1]
+        else:
+            grid_fname = grid_fname
+            grid = grd()
+            grid.read_grd(fname = grid_fname)
+            m = grid.m
+            n = grid.n
 
-        blank_row = np.ones(np.shape.(Z))*-999.
-        Z = np.append(Z, 999.)
-        np.savetxt(fname, [-Z, blank_row], delimiter = '\t', fmt = '%.3f')
+        Z = np.array([np.append(i,-999.) for i in Z])
+        Z = np.insert(Z, -1, np.ones(np.shape(Z[0]))*-999.)
+        Z = Z.reshape((m+1, n+1))
 
-        self.read_dep(fname = fname)
+        np.savetxt(fname, Z, delimiter = '\t', fmt = '%.3f')
+        print('saved depth file: %s' %os.path.basename(fname))
+
+        self.read_dep(fname)
 
     def plot_dep(self):
         plt.pcolormesh(self.grid.x, self.grid.y, self.depth,

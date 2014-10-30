@@ -4,6 +4,8 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import mpl_toolkits.basemap.pyproj as pyproj
+import math
+import datetime
 
 #------------------------------------------------------------------------------
 # READ DELFT GRID FILE
@@ -20,6 +22,20 @@ class grdFileDialog(QtGui.QMainWindow):
     def openfileDialog(self):
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd(), "GRD (*.grd)")
         self.fname = fname
+
+class grdsaveFileDialog(QtGui.QMainWindow):
+    def __init__(self):
+        super(grdsaveFileDialog, self).__init__()
+        fname = []
+        self.initUI()
+    def initUI(self):
+        self.setGeometry(300,300,350,300)
+        self.setWindowTitle('Save grid file')
+        self.savefileDialog()
+    def savefileDialog(self):
+        fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file', os.getcwd(), "GRD (*.grd)")
+        self.fname = fname
+
 
 class grd():
     """Orthogonal curvilinear grid file.  See A.3.2 in Delft3D-FLOW user manual.
@@ -39,9 +55,9 @@ class grd():
         n = ''
         coordinate_system = ''
         filename = ''
-        self.read_grd(fname)
+        #self.read_grd(fname)
 
-    def read_grd(self, fname=None, nan_value = 0.0):
+    def read_grd(self, fname=None, nan_value = -999.):
         '''Read a Delft3d Grid file.  If fname not specified, opens a file dialog. Some grids have
         a nan value specified in header, default nan value is 0... Can add functionality in this
         script to see if that is specified in the header or not.'''
@@ -110,17 +126,109 @@ class grd():
         fname = None
         f.close()
 
-    def write_grd(self, fname=None, depth = None, coord_system = 'Cartesian', ):
+    def write_rectgrd(self, fname=None, coord_system = 'Cartesian', m = None,
+            n = None, cellsize = None, x0 = None, y0 = None, depth = None):
+        
+        if not depth:
+            if not m:
+                m = int(input('number of rows: '))
+            if not n:
+                n = int(input('number of columns: '))
+        else:
+            depth = np.array(depth)
+            m = depth.shape[0]
+            n = depth.shape[1]
+        if not cellsize:
+                cellsize = float(input('cellsize: '))
+        if x0 is None:
+                x0 = float(input('xllcorner: '))
+        if y0 is None:
+                y0 = float(input('yllcorner: '))
 
-        header = '* \n* Delft3d- orthogonal curvilinear grid file\n* File creation date: %s\n*\n' %
-        str(datetime.datetime.now())
-        record1 = 'Coordinate System = %s\n' % coord_system
-        record2 = '\t%i\t%i\n' % (np.shape(x)[0],np.shape(x)[1])
-        record3 = '0 0 0\n'
+        records = []
+        rows = math.floor(n/5)
+        remainder = n%5
+
+        records.append('* \n* Delft3d- rectilinear grid file created with pydelft \n* File creation date: %s\n* \n' %str(datetime.datetime.now()))
+        records.append('Coordinate System = %s\n' % coord_system)
+        records.append('\t%i\t%i\n' % (n,m))
+        records.append('0 0 0\n')
 
         # Values for x
-        etax_1 = 10
+        for i in range(1,m+1):
+            etax = np.arange(x0, n*cellsize, cellsize)
 
+            if n > 5:
+                etax_1 = etax[0:5]
+                records.append('ETA=\t%i\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' %(i, 
+                                                                                 etax_1[0], 
+                                                                                 etax_1[1], 
+                                                                                 etax_1[2], 
+                                                                                 etax_1[3],
+                                                                                 etax_1[4]))
+                etax_mid = etax[5:-remainder]
+                for k in np.arange(0,np.size(etax_mid), 5):
+                    records.append('      \t\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' % (etax_mid[k],
+                                                                                      etax_mid[k+1],
+                                                                                      etax_mid[k+2],
+                                                                                      etax_mid[k+3],
+                                                                                      etax_mid[k+4]))
+                etax_last = etax[-remainder:]
+                records.append('      \t\t%.20e' % etax_last[0])
+                for i in etax_last[1:]:
+                    records.append('\t%.20e' %i)
+                records.append('\n')
+            elif n <= 5:
+                etax_1 = etax
+                records.append('ETA=\t%i' % i)
+                for i in etax_1:
+                    records.append('\t%.20e' % i)
+                records.append('\n')
+
+        # Values for y
+        y = np.arange(y0, m*cellsize, cellsize)
+        for j in range(1,m+1):
+            if n > 5:
+                etay = np.ones((n,1))*y[j-1]
+                etay_1 = etay[0:5]
+                records.append('ETA=\t%i\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' %(j, 
+                                                                            etay_1[0], etay_1[1],
+                                                                            etay_1[2], etay_1[3],
+                                                                            etay_1[4]))
+                etay_mid = etay[5:-remainder]
+                for k in np.arange(0,np.size(etay_mid), 5):
+                    records.append('      \t\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' % (etay_mid[k],
+                                                                                    etay_mid[k+1],
+                                                                                    etay_mid[k+2],
+                                                                                    etay_mid[k+3],
+                                                                                    etay_mid[k+4]))
+                etay_last = etay[-remainder:]
+                records.append('      \t\t%.20e' % etay_last[0])
+                for e in etay_last[1:]:
+                    records.append('\t%.20e' %e)
+                records.append('\n')
+            elif n <= 5:
+                etay = np.ones((n,1))*y[j-1]
+                etay_1 = etay
+                records.append('ETA=\t%i' % j)
+                for e in etay_1:
+                    records.append('\t%.20e' % e)
+                records.append('\n')
+
+        # Set filename via GUI if it's not specified.
+        if not fname:
+            app = QtGui.QApplication(sys.argv)
+            filedialog = grdFileDialog()
+            fname = filedialog.fname
+        else:
+            fname = fname
+
+        f = open(fname, 'w')
+        for r in records:
+            f.write(r)
+        f.close()
+
+        self.read_grd(fname = fname)
 
 
     def plot_grd(self):
