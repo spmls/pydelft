@@ -127,8 +127,8 @@ class grd():
         f.close()
 
     def write_rectgrd(self, fname=None, coord_system = 'Cartesian', m = None,
-            n = None, cellsize = None, x0 = None, y0 = None, depth = None):
-        
+                  n = None, cellsize = None, x0 = None, y0 = None, depth = None):
+
         if not depth:
             if not m:
                 m = int(input('number of rows: '))
@@ -146,73 +146,81 @@ class grd():
                 y0 = float(input('yllcorner: '))
 
         records = []
-        rows = math.floor(n/5)
-        remainder = n%5
+        rows = math.floor(m/5)
+        remainder = m%5
 
-        records.append('* \n* Delft3d- rectilinear grid file created with pydelft \n* File creation date: %s\n* \n' %str(datetime.datetime.now()))
+        records.append('* \n* Delft3d- rectilinear grid file created with pydelft \n* File creation date: %s\n* \n'
+                       %str(datetime.datetime.now()))
         records.append('Coordinate System = %s\n' % coord_system)
-        records.append('\t%i\t%i\n' % (n,m))
+        records.append('\t%i\t%i\n' % (m,n))
         records.append('0 0 0\n')
 
         # Values for x
-        for i in range(1,m+1):
-            etax = np.arange(x0, n*cellsize, cellsize)
-
-            if n > 5:
+        for i in range(1, n+1):
+            etax = np.arange(x0, m*cellsize+x0, cellsize)
+            if np.size(etax) > 5:
                 etax_1 = etax[0:5]
-                records.append('ETA=\t%i\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' %(i, 
-                                                                                 etax_1[0], 
-                                                                                 etax_1[1], 
-                                                                                 etax_1[2], 
-                                                                                 etax_1[3],
-                                                                                 etax_1[4]))
-                etax_mid = etax[5:-remainder]
-                for k in np.arange(0,np.size(etax_mid), 5):
-                    records.append('      \t\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' % (etax_mid[k],
-                                                                                      etax_mid[k+1],
-                                                                                      etax_mid[k+2],
-                                                                                      etax_mid[k+3],
-                                                                                      etax_mid[k+4]))
-                etax_last = etax[-remainder:]
+                records.append('ETA=\t%i\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' % (i,
+                                                                                  etax_1[0],
+                                                                                  etax_1[1],
+                                                                                  etax_1[2],
+                                                                                  etax_1[3],
+                                                                                  etax_1[4]))
+                if remainder != 0:
+                    etax_mid = etax[5:-remainder]
+                    etax_last = etax[-remainder:]
+                elif remainder == 0:
+                    etax_mid = etax[5:-5]
+                    etax_last = etax[-5:]
+                for j in np.arange(0,np.size(etax_mid), 5):
+                    records.append('      \t\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' % (etax_mid[j],
+                                                                                    etax_mid[j+1],
+                                                                                    etax_mid[j+2],
+                                                                                    etax_mid[j+3],
+                                                                                    etax_mid[j+4]))
                 records.append('      \t\t%.20e' % etax_last[0])
-                for i in etax_last[1:]:
-                    records.append('\t%.20e' %i)
+                for j in etax_last[1:]:
+                    records.append('\t%.20e' % j)
                 records.append('\n')
-            elif n <= 5:
+            elif np.size(etax) <= 5:
                 etax_1 = etax
                 records.append('ETA=\t%i' % i)
-                for i in etax_1:
-                    records.append('\t%.20e' % i)
+                for j in etax_1:
+                    records.append('\t%.20e' % j)
                 records.append('\n')
 
         # Values for y
         y = np.arange(y0, m*cellsize, cellsize)
-        for j in range(1,m+1):
-            if n > 5:
-                etay = np.ones((n,1))*y[j-1]
+        for i in range(1,n+1):
+            etay = np.ones((m,1))*y[i-1]
+            if np.size(etay) > 5:
                 etay_1 = etay[0:5]
-                records.append('ETA=\t%i\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' %(j, 
+                records.append('ETA=\t%i\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' %(i,
                                                                             etay_1[0], etay_1[1],
                                                                             etay_1[2], etay_1[3],
                                                                             etay_1[4]))
-                etay_mid = etay[5:-remainder]
-                for k in np.arange(0,np.size(etay_mid), 5):
-                    records.append('      \t\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' % (etay_mid[k],
-                                                                                    etay_mid[k+1],
-                                                                                    etay_mid[k+2],
-                                                                                    etay_mid[k+3],
-                                                                                    etay_mid[k+4]))
-                etay_last = etay[-remainder:]
+                if remainder != 0:
+                    etay_mid = etay[5:-remainder]
+                    etay_last = etay[-remainder:]
+                elif remainder == 0:
+                    etay_mid = etay[5:-5]
+                    etay_last = etay[-5:]
+                for j in np.arange(0,np.size(etay_mid), 5):
+                    records.append('      \t\t%.20e\t%.20e\t%.20e\t%.20e\t%.20e\n' % (etay_mid[j],
+                                                                                    etay_mid[j+1],
+                                                                                    etay_mid[j+2],
+                                                                                    etay_mid[j+3],
+                                                                                    etay_mid[j+4]))
                 records.append('      \t\t%.20e' % etay_last[0])
-                for e in etay_last[1:]:
-                    records.append('\t%.20e' %e)
+                for j in etay_last[1:]:
+                    records.append('\t%.20e' %j)
                 records.append('\n')
-            elif n <= 5:
-                etay = np.ones((n,1))*y[j-1]
+            elif np.size(etay) <= 5:
+                etay = np.ones((m,1))*y[i-1]
                 etay_1 = etay
-                records.append('ETA=\t%i' % j)
-                for e in etay_1:
-                    records.append('\t%.20e' % e)
+                records.append('ETA=\t%i' % i)
+                for j in etay_1:
+                    records.append('\t%.20e' % j)
                 records.append('\n')
 
         # Set filename via GUI if it's not specified.
