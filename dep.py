@@ -77,10 +77,10 @@ class dep():
             for line in lines:
                 for s in line.split():
                     z.append(float(s))
-                    
+
         # Reshape depth
         if delimiter != 'space':
-            z = np.reshape(z, (np.size(lines), 
+            z = np.reshape(z, (np.size(lines),
                 np.size(line.split('%s' % delimiter))))
         else:
             cols = np.where(np.array(z) == -999.)[0][1] - np.where(np.array(z) == -999.)[0][0]
@@ -88,6 +88,9 @@ class dep():
             z = np.reshape(z, (rows, cols))
         	 
         z = z[:-1, :-1] # get rid of -999. Nans        
+        z = np.reshape(z, (np.size(lines), np.size(line.split())))
+
+        z = z[:-1, :-1] # get rid of -999. Nans
 
         # update the class
         self.depth = z
@@ -106,10 +109,14 @@ class dep():
             app = []
         else:
             fname = fname
-        
+
         if not grid_fname:
-            m = np.shape(Z)[0]
-            n = np.shape(Z)[1]
+            if np.ndim(Z) == 1:
+                m = np.shape(Z)[0]
+                n = 1
+            else:
+                m = np.shape(Z)[0]
+                n = np.shape(Z)[1]
         else:
             grid_fname = grid_fname
             grid = grd()
