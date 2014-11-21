@@ -83,8 +83,10 @@ class dep():
             z = np.reshape(z, (np.size(lines), 
                 np.size(line.split('%s' % delimiter))))
         else:
-            z = np.reshape(z, (np.size(lines), np.size(line.split())))
-        
+            cols = np.where(np.array(z) == -999.)[0][1] - np.where(np.array(z) == -999.)[0][0]
+            rows = np.size(np.where(np.array(z) == -999.)[0][:-cols]) + 1
+            z = np.reshape(z, (rows, cols))
+        	 
         z = z[:-1, :-1] # get rid of -999. Nans        
 
         # update the class
