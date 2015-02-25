@@ -38,7 +38,7 @@ class his():
             fname = os.path.abspath(fname)
         ncFile = NetCDFFile(fname)
         #get times in unix epoch format (seconds since 01/01/1970)
-        self.times = np.array(ncFile.variables['time'])*24*60*60
+        self.times = (np.array(ncFile.variables['time'])-np.array(ncFile.variables['time'])[0])*24*60*60
         # get name of each obs station
         self.obs = [''.join(i.astype(str)).strip()
                     for i in np.array(ncFile.variables['platform_name'])]

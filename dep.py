@@ -4,7 +4,7 @@ import sys
 import os
 import matplotlib.pyplot as plt
 import mpl_toolkits.basemap.pyproj as pyproj
-from pydelft.grd import grd
+from pydelft import grd
 
 #--------------------------------------------------------------------------------------------------
 # READ DELFT DEPTH FILE
@@ -49,7 +49,7 @@ class dep():
         filename = ''
         delimiter = ''
 
-    def read_dep(self, fname = None):
+    def read_dep(self, fname = None, grd_fname = None):
         if not fname:
             app = QtGui.QApplication(sys.argv)
             filedialog = depFileDialog()
@@ -79,18 +79,26 @@ class dep():
                     z.append(float(s))
 
         # Reshape depth
-        if delimiter != 'space':
-            z = np.reshape(z, (np.size(lines),
-                np.size(line.split('%s' % delimiter))))
+        if grd_fname:
+            grid = grd.grd()
+            grid.read_grd(grd_fname)
+            z = np.ma.masked_equal(z, -999.)
+            z = np.ma.compressed(z)
+            z = np.reshape(z, (grid.m, grid.n))
         else:
-            cols = np.where(np.array(z) == -999.)[0][1] - np.where(np.array(z) == -999.)[0][0]
-            rows = np.size(np.where(np.array(z) == -999.)[0][:-cols]) + 1
-            z = np.reshape(z, (rows, cols))
-        	 
-        z = z[:-1, :-1] # get rid of -999. Nans        
-        z = np.reshape(z, (np.size(lines), np.size(line.split())))
+            if delimiter != 'space':
+                z = np.reshape(z, (np.size(lines),
+                    np.size(line.split('%s' % delimiter))))
+                z = z[:-1, :-1] # get rid of -999. Nans
+                z = np.reshape(z, (np.size(lines)-1, np.size(line.split())-1))
 
-        z = z[:-1, :-1] # get rid of -999. Nans
+                z = z[:-1, :-1] # get rid of -999. Nans
+            else:
+                a = np.where(np.array(z) == -999.)
+                cols = np.max(np.ediff1d(a))
+                rows = np.size(np.array_split(a[0],np.where(np.diff(a[0])!=1)[0]+1))
+                z = np.reshape(z, (rows, cols))
+
 
         # update the class
         self.depth = z
@@ -119,7 +127,7 @@ class dep():
                 n = np.shape(Z)[1]
         else:
             grid_fname = grid_fname
-            grid = grd()
+            grid = grd.grd()
             grid.read_grd(fname = grid_fname)
             m = grid.m
             n = grid.n

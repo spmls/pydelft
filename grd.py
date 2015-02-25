@@ -190,7 +190,7 @@ class grd():
                 records.append('\n')
 
         # Values for y
-        y = np.arange(y0, m*cellsize, cellsize)
+        y = np.arange(y0, y0+m*cellsize, cellsize)
         for i in range(1,n+1):
             etay = np.ones((m,1))*y[i-1]
             if np.size(etay) > 5:
