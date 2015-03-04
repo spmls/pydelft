@@ -45,6 +45,8 @@ class his():
         for idx, obs in enumerate(self.obs):
             if obs[0].isdigit():
                 obs_str = "_" + obs
+            elif '-' in obs:
+                obs_str = obs.replace("-","_")
             else:
                 obs_str = obs
             d = {}
@@ -69,4 +71,35 @@ class his():
                         d[i] = array[:,idx,:]
                     else:
                         print("Error: variable '%s' shape not defined" %i)
+            # calculate depth averaged velocity if needed
+            if d['u_x'].ndim > 1: # test if velocity array has more than one layer
+                Ux = [self.calc_da_vel(d['u_x'][t], d['waterlevel'][t] - (-d['depth'])) for t in range(0, self.times.size)]
+                Uy = [self.calc_da_vel(d['u_y'][t], d['waterlevel'][t] - (-d['depth'])) for t in range(0, self.times.size)]
+                d['U_x'] = np.array(Ux)
+                d['U_y'] = np.array(Uy)
+            else:
+                d['U_x'] = d['u_x']
+                d['U-y'] = d['u_y']
+            # calculate Froude number
+            frx = [self.calc_froude(d['U_x'][t], d['waterlevel'][t] - (-d['depth'])) for t in range(0, self.times.size)]
+            fry = [self.calc_froude(d['U_y'][t], d['waterlevel'][t] - (-d['depth'])) for t in range(0, self.times.size)]
+            d['fr_x'] = frx
+            d['fr_y'] = fry
+
             setattr(self,obs_str,d)
+
+    def calc_da_vel(self, velocities, depth, layers=[100,80,60,45,33,23,15,9,5,2]):
+        '''Calculate the depth averaged velocity if using a layered model
+        layers: the percentage of depth in the water column at which velocity points are measured [enter in %]
+        '''
+        layers = np.array(layers)*0.01*depth
+        dav = np.trapz(velocities, layers, dx = 0.001, axis = -1)/depth
+        return dav
+
+    def calc_froude(self, dav, depth):
+        '''Calculate the froude number using depth averaged velocity and depth'''
+        fr  = np.abs(dav)/np.sqrt(9.81*np.abs(depth))
+        return fr
+
+
+
