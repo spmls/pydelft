@@ -72,14 +72,14 @@ class his():
                     else:
                         print("Error: variable '%s' shape not defined" %i)
             # calculate depth averaged velocity if needed
-            if d['u_x'].ndim > 1: # test if velocity array has more than one layer
+            if d['u_x'].shape[1] > 1: # test if velocity array has more than one layer
                 Ux = [self.calc_da_vel(d['u_x'][t], d['waterlevel'][t] - (-d['depth'])) for t in range(0, self.times.size)]
                 Uy = [self.calc_da_vel(d['u_y'][t], d['waterlevel'][t] - (-d['depth'])) for t in range(0, self.times.size)]
                 d['U_x'] = np.array(Ux)
                 d['U_y'] = np.array(Uy)
             else:
                 d['U_x'] = d['u_x']
-                d['U-y'] = d['u_y']
+                d['U_y'] = d['u_y']
             # calculate Froude number
             frx = [self.calc_froude(d['U_x'][t], d['waterlevel'][t] - (-d['depth'])) for t in range(0, self.times.size)]
             fry = [self.calc_froude(d['U_y'][t], d['waterlevel'][t] - (-d['depth'])) for t in range(0, self.times.size)]
