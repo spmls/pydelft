@@ -3,7 +3,7 @@ from PyQt4 import QtGui
 import sys
 import os
 import matplotlib.pyplot as plt
-import mpl_toolkits.basemap.pyproj as pyproj
+from mpl_toolkits.basemap import pyproj
 from pydelft import grd
 
 #--------------------------------------------------------------------------------------------------
@@ -96,9 +96,9 @@ class dep():
             else:
                 a = np.where(np.array(z) == -999.)
                 cols = np.max(np.ediff1d(a))
-                rows = np.size(np.array_split(a[0],np.where(np.diff(a[0])!=1)[0]+1))
+                rows = np.size(np.array_split(a[0],np.where(np.diff(a[0])!=1)[0]+1))+1
                 z = np.reshape(z, (rows, cols))
-
+                z = z[:-1, :-1]
 
         # update the class
         self.depth = z

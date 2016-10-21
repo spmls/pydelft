@@ -2,8 +2,7 @@ import numpy as np
 from pydelft.grd import grd
 from pydelft.dep import dep
 from PyQt4 import QtGui
-import mpl_toolkits.basemap.pyproj as pyproj
-import mpl_toolkits.basemap as Basemap
+from mpl_toolkits.basemap import Basemap, pyproj
 import sys
 import os
 

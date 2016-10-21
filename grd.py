@@ -3,7 +3,7 @@ from PyQt4 import QtGui
 import sys
 import os
 import matplotlib.pyplot as plt
-import mpl_toolkits.basemap.pyproj as pyproj
+from mpl_toolkits.basemap import pyproj
 import math
 import datetime
 
