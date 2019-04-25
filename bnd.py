@@ -1,27 +1,10 @@
 import numpy as np
 from pydelft.grd import grd
 from pydelft.dep import dep
-from PyQt4 import QtGui
+from tkinter import filedialog
 import sys
 import os
 import pandas as pd
-
-
-class bndFileDialog(QtGui.QMainWindow):
-    def __init__(self):
-        super(bndFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Open boundary definition file')
-        self.openfileDialog()
-
-    def openfileDialog(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd(), "BND (*.bnd)")
-        self.fname = fname
-
 
 class bnd():
     '''Delft3d boundary definition file'''
@@ -31,9 +14,7 @@ class bnd():
     def read_bnd(self, fname=None):
         '''Read a Delft3d boundary definition file'''
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = bndFileDialog()
-            fname = filedialog.fname
+            fname = filedialog.askopenfilename()
         else:
             fname = fname
 
@@ -85,4 +66,3 @@ class bnd():
         self.x2 = np.array(x2)
         self.y1 = np.array(y1)
         self.y2 = np.array(y2)
-

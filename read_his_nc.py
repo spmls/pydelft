@@ -4,26 +4,6 @@ from PyQt4 import QtGui
 import os
 import sys
 
-class ncFileDialog(QtGui.QMainWindow):
-    '''A file dialog for opening Delft3d FLOW history files in netcdf format.
-    Assumes that the netcdf file was converted in matlab from a NEFIS file using
-    vs_trih2nc, which is why the file dialog prompts for .nc files with 'his' in
-    the filename.  This class is called in __init__ in the 'obs' class.'''
-    def __init__(self):
-        super(ncFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Open netcdf history file')
-        self.openfileDialog()
-    def openfileDialog(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self,
-                                                  'Open netcdf history file',
-                                                  os.getcwd(),
-                                                  "netcdf (*his*.nc);; all (*)")
-        self.fname = fname
-
 class his():
     '''Loads data from a netcdf file that was converted from a NEFIS history file.'''
     def __init__(self, fname=None):
@@ -31,9 +11,7 @@ class his():
     def read_his_nc(self, fname=None):
         # Set filename via GUI if it's not specified.
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = ncFileDialog()
-            fname = os.path.abspath(filedialog.fname)
+            fname = filedialog.askopenfilename()
         else:
             fname = os.path.abspath(fname)
         ncFile = NetCDFFile(fname)
@@ -100,6 +78,3 @@ class his():
         '''Calculate the froude number using depth averaged velocity and depth'''
         fr  = np.abs(dav)/np.sqrt(9.81*np.abs(depth))
         return fr
-
-
-

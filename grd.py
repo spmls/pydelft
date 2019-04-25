@@ -1,42 +1,14 @@
 import numpy as np
-from PyQt4 import QtGui
+from tkinter import filedialog
 import sys
 import os
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import pyproj
+import pyproj
 import math
 import datetime
 
 #------------------------------------------------------------------------------
 # READ DELFT GRID FILE
-
-class grdFileDialog(QtGui.QMainWindow):
-    def __init__(self):
-        super(grdFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Open grid file')
-        self.openfileDialog()
-    def openfileDialog(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd(), "GRD (*.grd)")
-        self.fname = fname
-
-class grdsaveFileDialog(QtGui.QMainWindow):
-    def __init__(self):
-        super(grdsaveFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Save grid file')
-        self.savefileDialog()
-    def savefileDialog(self):
-        fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file', os.getcwd(), "GRD (*.grd)")
-        self.fname = fname
-
-
 class grd():
     """Orthogonal curvilinear grid file.  See A.3.2 in Delft3D-FLOW user manual.
 
@@ -63,9 +35,7 @@ class grd():
         script to see if that is specified in the header or not.'''
         # Set filename via GUI if it's not specified.
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = grdFileDialog()
-            fname = filedialog.fname
+            fname = filedialog.askopenfilename()
         else:
             fname = fname
 
@@ -225,9 +195,7 @@ class grd():
 
         # Set filename via GUI if it's not specified.
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = grdFileDialog()
-            fname = filedialog.fname
+            fname = filedialog.asksaveasfile()
         else:
             fname = fname
 
@@ -260,4 +228,3 @@ class grd():
         idx = [find_nearest(self,[x[i],y[i]]) for i in range(0, np.size(x)-1)]
 
         return idx
-

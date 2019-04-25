@@ -6,21 +6,6 @@ import sys
 import os
 import pandas as pd
 
-class bctFileDialog(QtGui.QMainWindow):
-    def __init__(self):
-        super(bctFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Open boundary conditions time-series file')
-        self.openfileDialog()
-
-    def openfileDialog(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd(), "BCT (*.bct)")
-        self.fname = fname
-
 class bct():
     '''Delft3d boundary conditions time-series file'''
     def __init__(self,fname=None, bnd_fname=None):
@@ -31,9 +16,7 @@ class bct():
     def read_bct(self, fname=None):
         '''Read a Delft3d boundary conditions time-series file'''
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = bctFileDialog()
-            fname = filedialog.fname
+            fname = filedialog.askopenfilename()
         else:
             fname = fname
 
@@ -48,4 +31,3 @@ class bct():
         self.interpolation = []
         self.parameter = []
         self.data = []
-

@@ -1,39 +1,15 @@
 import numpy as np
-from PyQt4 import QtGui
+from tkinter import filedialog
 import sys
 import os
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import pyproj
+import pyproj
 from pydelft import grd
+
+import sys
 
 #--------------------------------------------------------------------------------------------------
 # READ DELFT DEPTH FILE
-class depFileDialog(QtGui.QMainWindow):
-    def __init__(self):
-        super(depFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Open depth file')
-        self.openfileDialog()
-    def openfileDialog(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd(), "DEP (*.dep)")
-        self.fname = fname
-
-class depwriteFileDialog(QtGui.QMainWindow):
-    def __init__(self):
-        super(depwriteFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Save depth file')
-        self.savefileDialog()
-    def savefileDialog(self):
-        fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file', os.getcwd(), "DEP (*.dep)")
-        self.fname = fname
-
 class dep():
     """Bathymetry file.  See A.3.4 in Delft3D-FLOW user manual.
 
@@ -51,10 +27,7 @@ class dep():
 
     def read_dep(self, fname = None, grd_fname = None):
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = depFileDialog()
-            fname = filedialog.fname
-            app = []
+            fname = filedialog.askopenfilename()
         else:
             fname = fname
 
@@ -111,10 +84,7 @@ class dep():
 
     def write_dep(self, Z, fname = None, grid_fname = None):
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = depwriteFileDialog()
-            fname = filedialog.fname
-            app = []
+            fname = filedialog.asksaveasfile()
         else:
             fname = fname
 

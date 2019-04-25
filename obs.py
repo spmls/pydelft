@@ -7,35 +7,6 @@ import sys
 import os
 
 #------------------------------------------------------------------------------
-# OBS SAVE FILE DIALOG
-
-class SaveObsFileDialog(QtGui.QMainWindow):
-    def __init__(self):
-        super(SaveObsFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Save obs file')
-        self.savefileDialog()
-    def savefileDialog(self):
-        fname = QtGui.QFileDialog.getSaveFileName(self, 'Save file', os.getcwd(), "OBS (*.obs)")
-        self.fname = fname
-
-class OpenObsFileDialog(QtGui.QMainWindow):
-    def __init__(self):
-        super(OpenObsFileDialog, self).__init__()
-        fname = []
-        self.initUI()
-    def initUI(self):
-        self.setGeometry(300,300,350,300)
-        self.setWindowTitle('Open obs file')
-        self.openfileDialog()
-    def openfileDialog(self):
-        fname = QtGui.QFileDialog.getOpenFileName(self, 'Open file', os.getcwd(), "OBS (*.obs)")
-        self.fname = fname
-
-#------------------------------------------------------------------------------
 # OBSERVATIONS DATA CLASS
 
 class obs():
@@ -51,9 +22,7 @@ class obs():
 
     def read_obs(self, fname = None):
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = OpenObsFileDialog()
-            fname = filedialog.fname
+            fname = filedialog.askopenfilename()
         else:
             fname = fname
 
@@ -106,9 +75,7 @@ class obs():
 
     def write(self, fname = None):
         if not fname:
-            app = QtGui.QApplication(sys.argv)
-            filedialog = SaveObsFileDialog()
-            fname = filedialog.fname
+            fname = filedialog.asksaveasfile()
         else:
             fname = fname
 
