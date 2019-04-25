@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import pyproj
 from pydelft import grd
 
-import sys
-
 #--------------------------------------------------------------------------------------------------
 # READ DELFT DEPTH FILE
 class dep():
